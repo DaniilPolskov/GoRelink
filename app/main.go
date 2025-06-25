@@ -3,23 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"strings"
+
+	"GoRelink/shortener"
 )
 
 var urlMake = make(map[string]string)
-
-const idLength = 6
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-func generateRandomID() string {
-	b := make([]byte, idLength)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
-	}
-	return string(b)
-}
 
 func main() {
 	var oldURL string
@@ -32,7 +22,7 @@ func main() {
 
 	var id string
 	for {
-		id = generateRandomID()
+		id = shortener.GenerateID()
 		if _, exists := urlMake[id]; !exists {
 			break
 		}
