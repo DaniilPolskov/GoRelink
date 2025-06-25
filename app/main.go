@@ -3,19 +3,22 @@ package main
 import (
 	"fmt"
 	"log"
-	"math"
 	"math/rand"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
 var urlMake = make(map[string]string)
 
+const idLength = 6
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
 func generateRandomID() string {
-	number := math.Pow(10, 10)
-	randomSeed := rand.Intn(int(number))
-	return strconv.Itoa(randomSeed)
+	b := make([]byte, idLength)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }
 
 func main() {
@@ -27,13 +30,20 @@ func main() {
 		oldURL = "https://" + oldURL
 	}
 
-	id := generateRandomID()
+	var id string
+	for {
+		id = generateRandomID()
+		if _, exists := urlMake[id]; !exists {
+			break
+		}
+	}
+
 	shortURL := "http://localhost:8080/gorelink/" + id
 
 	urlMake[id] = oldURL
 
 	fmt.Println("Old URL:", oldURL)
-	fmt.Println("Short URL:   ", shortURL)
+	fmt.Println("Short URL:", shortURL)
 
 	http.HandleFunc("/gorelink/", func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Path[len("/gorelink/"):]
