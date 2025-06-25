@@ -16,8 +16,8 @@ A simple console-based URL shortener with a redirect server built using Go.
 ```
 
 Enter URL to shorten: google.com
-Old URL: [https://google.com](https://google.com)
-Short URL: [http://localhost:8080/gorelink/1234567890](http://localhost:8080/gorelink/1234567890)
+Old URL: https://google.com
+Short URL: http://localhost:8080/gorelink/1234567890
 
 ```
 
