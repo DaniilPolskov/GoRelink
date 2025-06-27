@@ -1,50 +1,80 @@
-# Go URL Shortener
+# GoRelink – Go URL Shortener
 
-A simple console-based URL shortener with a redirect server built using Go.
+A simple URL shortener written in Go with both a console interface and a basic HTML web UI.
 
 ## Features
 
-- Accepts a URL from the user via the console.
-- Automatically adds `https://` if missing.
-- Generates a random short identifier.
-- Stores the mapping between short and original URLs in memory.
-- Starts a local HTTP server to handle redirection.
-- Redirects users to the original URL when they visit the shortened one.
+* Accepts a URL from the terminal or via web form.
+* Automatically prepends `https://` if missing.
+* Generates a random short identifier.
+* Stores short → original URL mappings in memory.
+* Exposes an `/api/shorten` endpoint for web clients.
+* Redirects users from short URLs using `/gorelink/{id}`.
+* Includes a basic HTML frontend with a logo.
 
-## Example
+---
 
-```
-
-Enter URL to shorten: google.com
-Old URL: https://google.com
-Short URL: http://localhost:8080/gorelink/1234567890
-
-```
-
-Visiting the short URL in your browser redirects you to the original link.
-
-## How to Run
-
-1. Make sure you have Go installed.
-2. Clone the repository.
-3. Run the application:
+## Usage (Console Mode)
 
 ```bash
 go run main.go
 ```
 
-4. Enter a URL when prompted in the terminal.
-5. Open the printed short URL in your browser to test the redirect.
+Then follow the prompt:
 
-## Notes
+```text
+Enter URL to shorten: google.com
+Old URL: https://google.com
+Short URL: http://localhost:8080/gorelink/XyZ123
+```
 
-* This version uses in-memory storage (`map[string]string`). All data is lost when the program stops.
-* It’s intended for demonstration or learning purposes.
-* The short ID is randomly generated and not guaranteed to be unique. In production, you'd want to check for duplicates or use a UUID or hash.
+Opening the short URL in a browser redirects to the original.
 
-## Possible Improvements
+---
 
-* Store links in a file or database.
-* Add a web form for submitting URLs.
-* Generate collision-free short IDs.
-* Support expiration dates for short links.
+## Usage (Web UI)
+
+1. Open `index.html` in your browser or host it via Go.
+2. Enter a URL into the form.
+3. The shortened link will appear below the form.
+4. It uses `POST /api/shorten` to generate short URLs.
+
+---
+
+## API
+
+### `POST /api/shorten`
+
+**Request Body:**
+
+```json
+{
+  "url": "https://example.com"
+}
+```
+
+**Response:**
+
+```json
+{
+  "shortURL": "http://localhost:8080/gorelink/XyZ123"
+}
+```
+
+CORS is enabled for local testing.
+
+---
+
+## Storage
+
+Currently uses in-memory map. Data will be lost when the program stops.
+
+---
+
+## Run Instructions
+
+```bash
+git clone https://github.com/DaniilPolskov/GoRelink.git
+cd GoRelink
+go run main.go
+```
