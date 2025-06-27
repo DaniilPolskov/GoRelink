@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 500px;
+      max-width: 600px;
       margin: 40px auto;
       padding: 0 20px;
     }
@@ -15,14 +15,22 @@
     }
     form {
       display: flex;
+      gap: 10px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
     }
-    input[type="text"] {
-      flex: 1;
+    input[type="text"], input[type="number"] {
       padding: 10px;
       font-size: 1rem;
       border: 1px solid #000000;
-      border-radius: 4px 0 0 4px;
+      border-radius: 4px;
+    }
+    input[type="text"] {
+      flex: 1 1 300px;
+    }
+    input[type="number"] {
+      width: 80px;
     }
     button {
       padding: 10px 20px;
@@ -31,11 +39,22 @@
       background: #00ADD8;
       color: white;
       cursor: pointer;
-      border-radius: 0 4px 4px 0;
+      border-radius: 4px;
+      flex-shrink: 0;
     }
     .result {
       font-weight: bold;
-      word-break: break-all;
+      word-break: break-word;
+    }
+    .result ul {
+      padding-left: 20px;
+      margin: 0;
+    }
+    .bottom-logo {
+      display: block;
+      margin: 40px auto 0 auto;
+      width: 120px;
+      opacity: 0.7;
     }
   </style>
 </head>
@@ -43,28 +62,41 @@
   <h1>GoRelink URL Shortener</h1>
   <form id="shorten-form">
     <input type="text" id="url-input" placeholder="Enter URL to shorten" required />
+    <input type="number" id="count-input" placeholder="Count (1-10)" min="1" max="10" value="1" required />
     <button type="submit">Shorten</button>
   </form>
   <div class="result" id="result"></div>
-  <img src="golang-img.png" alt="Golang logo" class="bottom-logo">
+  <img src="golang-img.png" alt="Golang logo" class="bottom-logo" />
 
   <script>
     const form = document.getElementById('shorten-form');
     const input = document.getElementById('url-input');
+    const countInput = document.getElementById('count-input');
     const result = document.getElementById('result');
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
       const url = input.value.trim();
-      if (!url) return;
+      let count = parseInt(countInput.value, 10);
+
+      if (!url) {
+        result.textContent = "Please enter a URL.";
+        return;
+      }
+      if (isNaN(count) || count < 1 || count > 10) {
+        result.textContent = "Count must be a number between 1 and 10.";
+        return;
+      }
+
+      result.textContent = "Processing...";
 
       try {
-        const response = await fetch('http://localhost:8080/api/shorten', {
+        const response = await fetch('http://localhost:8080/api/shorten/batch', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ url })
+          body: JSON.stringify({ url, count })
         });
 
         if (!response.ok) {
@@ -73,7 +105,13 @@
 
         const data = await response.json();
 
-        result.innerHTML = `Short URL: <a href="${data.shortURL}" target="_blank">${data.shortURL}</a>`;
+        if (count === 1) {
+          result.innerHTML = `Short URL: <a href="${data.shortURLs[0]}" target="_blank" rel="noopener noreferrer">${data.shortURLs[0]}</a>`;
+        } else {
+          result.innerHTML = '<strong>Short URLs:</strong><ul>' +
+            data.shortURLs.map(url => `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></li>`).join('') +
+            '</ul>';
+        }
       } catch (error) {
         result.textContent = `Error: ${error.message}`;
       }
