@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,28 +14,50 @@ import (
 func main() {
 	store := storage.NewMemoryStore()
 
-	var oldURL string
-	fmt.Print("Enter URL to shorten: ")
-	fmt.Scanln(&oldURL)
+	http.HandleFunc("/api/shorten", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-	if !strings.HasPrefix(oldURL, "http://") && !strings.HasPrefix(oldURL, "https://") {
-		oldURL = "https://" + oldURL
-	}
-
-	var id string
-	for {
-		id = shortener.GenerateID()
-		if _, exists := store.Get(id); !exists {
-			break
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
 		}
-	}
 
-	store.Save(id, oldURL)
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
 
-	shortURL := "http://localhost:8080/gorelink/" + id
+		var req struct {
+			URL string `json:"url"`
+		}
+		err := json.NewDecoder(r.Body).Decode(&req)
+		if err != nil || req.URL == "" {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
 
-	fmt.Println("Old URL:", oldURL)
-	fmt.Println("Short URL:", shortURL)
+		if !strings.HasPrefix(req.URL, "http://") && !strings.HasPrefix(req.URL, "https://") {
+			req.URL = "https://" + req.URL
+		}
+
+		var id string
+		for {
+			id = shortener.GenerateID()
+			if _, exists := store.Get(id); !exists {
+				break
+			}
+		}
+
+		store.Save(id, req.URL)
+
+		shortURL := fmt.Sprintf("http://localhost:8080/gorelink/%s", id)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"shortURL": shortURL,
+		})
+	})
 
 	http.HandleFunc("/gorelink/", func(w http.ResponseWriter, r *http.Request) {
 		id := strings.TrimPrefix(r.URL.Path, "/gorelink/")
