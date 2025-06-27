@@ -7,11 +7,12 @@ import (
 	"strings"
 
 	"GoRelink/shortener"
+	"GoRelink/storage"
 )
 
-var urlMake = make(map[string]string)
-
 func main() {
+	store := storage.NewMemoryStore()
+
 	var oldURL string
 	fmt.Print("Enter URL to shorten: ")
 	fmt.Scanln(&oldURL)
@@ -23,21 +24,21 @@ func main() {
 	var id string
 	for {
 		id = shortener.GenerateID()
-		if _, exists := urlMake[id]; !exists {
+		if _, exists := store.Get(id); !exists {
 			break
 		}
 	}
 
-	shortURL := "http://localhost:8080/gorelink/" + id
+	store.Save(id, oldURL)
 
-	urlMake[id] = oldURL
+	shortURL := "http://localhost:8080/gorelink/" + id
 
 	fmt.Println("Old URL:", oldURL)
 	fmt.Println("Short URL:", shortURL)
 
 	http.HandleFunc("/gorelink/", func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Path[len("/gorelink/"):]
-		oldURL, found := urlMake[id]
+		id := strings.TrimPrefix(r.URL.Path, "/gorelink/")
+		oldURL, found := store.Get(id)
 		if !found {
 			http.NotFound(w, r)
 			return
