@@ -69,6 +69,25 @@ CORS is enabled for local testing.
 
 Currently uses in-memory map. Data will be lost when the program stops.
 
+## Possible Improvements
+
+* Store links in a file or database.
+* Add a web form for submitting URLs.
+* Generate collision-free short IDs.
+* Support expiration dates for short links.
+
+## Testing
+
+This project includes unit tests for the HTTP handlers and storage logic.
+
+To run tests, use:
+
+```bash
+go test ./...
+```
+
+This will run all tests and show verbose output.
+
 ---
 
 ## Run Instructions
@@ -78,3 +97,4 @@ git clone https://github.com/DaniilPolskov/GoRelink.git
 cd GoRelink
 go run main.go
 ```
+
