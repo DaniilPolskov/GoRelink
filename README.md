@@ -49,8 +49,6 @@ go run main.go
 * Generate collision-free short IDs.
 * Support expiration dates for short links.
 
----
-
 ## Testing
 
 This project includes unit tests for the HTTP handlers and storage logic.
