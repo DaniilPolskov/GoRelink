@@ -14,24 +14,6 @@ A simple URL shortener written in Go with both a console interface and a basic H
 
 ---
 
-## Usage (Console Mode)
-
-```bash
-go run main.go
-```
-
-Then follow the prompt:
-
-```text
-Enter URL to shorten: google.com
-Old URL: https://google.com
-Short URL: http://localhost:8080/gorelink/XyZ123
-```
-
-Opening the short URL in a browser redirects to the original.
-
----
-
 ## Usage (Web UI)
 
 1. Open `index.html` in your browser or host it via Go.
