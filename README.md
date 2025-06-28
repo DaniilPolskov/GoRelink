@@ -48,3 +48,17 @@ go run main.go
 * Add a web form for submitting URLs.
 * Generate collision-free short IDs.
 * Support expiration dates for short links.
+
+---
+
+## Testing
+
+This project includes unit tests for the HTTP handlers and storage logic.
+
+To run tests, use:
+
+```bash
+go test ./...
+```
+
+This will run all tests and show verbose output.
